@@ -1,0 +1,8 @@
+spacy
+nltk
+scikit-learn
+lightgbm
+emoji
+textacy
+pandas
+gensim
