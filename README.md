@@ -209,5 +209,3 @@ data/
 ## Autor
 
 Projeto desenvolvido como parte de estudos em PLN e Machine Learning por Paulo Vitor.
-
----
