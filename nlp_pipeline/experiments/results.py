@@ -28,3 +28,8 @@ class ResultsManager:
         print(df.head(top_n))
 
         return df
+    
+    def save(self, path="results.csv"):
+        df = self.to_dataframe()
+        df.to_csv(path, index=False)
+        print(f"\nResultados salvos em: {path}")

@@ -12,7 +12,36 @@ Este projeto permite:
 * Testar múltiplas abordagens de vetorização;
 * Treinar diversos modelos clássicos;
 * Comparar resultados de forma estruturada;
-* Selecionar automaticamente as melhores configurações.
+* Selecionar automaticamente as melhores configurações;
+* Evitar combinações de configuração inválidas ou pouco adequadas;;
+
+--- 
+
+## Justificativa das escolhas de pré-processamento e vetorização
+
+### Pré-processamento
+
+* Tokenização e lematização — spaCy: integração entre etapas linguísticas (tokenização, lematização e stopwords). A lematização foi escolhida por preservar melhor o significado das palavras em comparação ao stemming.
+
+* Remoção de stopwords — spaCy: reduzir ruído (foi incluída a opção keep_negations para preservar palavras como “não” e “nunca”, relevantes para a polaridade).
+
+* Tratamento de negações (regra customizada): adição do sufixo _NEG em tokens após negações para diferenciar termos como “gostei” e “gostei_NEG”.
+
+* Normalização de emojis — emoji: converter emojis em texto para preservar informação semântica em dados informais.
+
+* Limpeza básica (lowercase e remoção de URLs): padronizar o texto e remover ruídos não relevantes.
+
+### Vetorização
+
+* TF-IDF — scikit-learn: capturar a importância relativa dos termos.
+
+* N-grams (especialmente (1,2)): capturar contexto local.
+
+* Sublinear TF: reduzir o impacto de termos muito frequentes, melhorando a distribuição dos pesos.
+
+* TF-IDF + TruncatedSVD — scikit-learn: reduzir a dimensionalidade do espaço vetorial, mantendo a maior parte da variância dos dados.
+
+* Word2Vec — Gensim: capturar relações semânticas entre palavras por meio de embeddings densos.
 
 ---
 
@@ -202,7 +231,25 @@ nlp_pipeline/
 │
 config/
 data/
+requirements.txt
+README.md
 ```
+
+## Análise dos Resultados
+
+Para comprovar o funcionamento da pipeline, bem como comparar o desempenho das combinações de modelos de machine learning clássicos, técnicas de pré-processamento e vetorização em tarefas de PLN, 10 configurações aleatórias definidas a partir de um espaço de busca pré-estabelecido foram avaliadas. A partir disso, os resultados descritos abaixo puderam ser observados.
+
+Os experimentos demonstraram que modelos lineares, como SVM e Regressão Logística, apresentaram desempenho superior em relação a modelos baseados em árvores, como Random Forest e LightGBM. Isso pode ser explicado pela natureza dos dados textuais, caracterizados por alta dimensionalidade e esparsidade, favorecendo modelos lineares.
+
+Em relação à vetorização, o uso de TF-IDF com n-gramas de tamanho (1,2) apresentou os melhores resultados, indicando que a inclusão de bigramas contribui para capturar contexto relevante sem introduzir ruído excessivo. Já o uso de trigramas mostrou-se instável, possivelmente devido ao aumento significativo da dimensionalidade.
+
+A aplicação de sublinear TF também contribuiu positivamente, reduzindo o impacto de termos muito frequentes e melhorando a capacidade de generalização do modelo.
+
+No contexto deste experimento, observou-se que estratégias completas de pré-processamento, isto é, as que incluíram lematização, remoção de stopwords, tratamento de negações e normalização de emojis, resultaram em melhor desempenho médio. Isso sugere que, para este dataset e conjunto de modelos, a qualidade da representação textual teve impacto significativo nos resultados.
+
+Por fim, foi possível identificar casos de overfitting, especialmente em algumas configurações envolvendo modelos baseados em árvores, nos quais houve discrepância significativa entre os resultados de validação e teste. Isso reforça a importância de avaliar modelos em dados não vistos para garantir robustez.
+
+As configurações e métricas dos modelos analisados podem ser encontradas em `experiments/result.csv` e o experimento pode ser replicado de maneira análoga por meio do script `experiments/model_analysis.py`.
 
 ---
 

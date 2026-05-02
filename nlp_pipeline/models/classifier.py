@@ -6,6 +6,13 @@ from lightgbm import LGBMClassifier
 
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
+VALID_PARAMS = {    
+    "logreg": {"C", "max_iter"},
+    "svm": {"C"},
+    "nb": {"alpha"},
+    "rf": {"n_estimators", "max_depth"},
+    "lgbm": {"n_estimators", "learning_rate"}
+}
 
 class Classifier:
     def __init__(self, config: dict):
@@ -49,9 +56,16 @@ class Classifier:
     def fit(self, X, y):
         base_model = self._get_base_model()
 
-        # 🔹 MODO MANUAL
-        if self.search_type == "manual":
-            base_model.set_params(**self.params)
+        if self.search_type == "manual":     
+            model_name = self.model_name
+            valid_keys = VALID_PARAMS.get(model_name, set())
+            filtered_params = {
+                k: v for k, v in self.params.items()
+                if k in valid_keys
+            }
+            if filtered_params:
+                base_model.set_params(**filtered_params)
+
             self.model = base_model
             self.model.fit(X, y)
 
@@ -86,8 +100,8 @@ class Classifier:
             search.fit(X, y)
             self.model = search.best_estimator_
 
-            print("🎲 Best params (Random):", search.best_params_)
-            print("📊 Best score:", search.best_score_)
+            print("Best params (Random):", search.best_params_)
+            print("Best score:", search.best_score_)
 
         else:
             raise ValueError(f"Search inválido: {self.search_type}")
@@ -97,3 +111,5 @@ class Classifier:
     # ---------------------------
     def predict(self, X):
         return self.model.predict(X)
+    
+    

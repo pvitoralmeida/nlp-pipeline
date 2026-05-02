@@ -41,12 +41,27 @@ class ExperimentRunner:
 
         else:
             raise ValueError("Strategy inválida")
+        
+    def is_valid_combination(self, config):
+        vec = config["vectorization"]["method"]
+        model = config["model"]["model"]
+
+        invalid_pairs = {
+            ("tfidf_svd", "nb"),
+            ("word2vec", "nb"),
+        }
+
+        if (vec, model) in invalid_pairs:
+            return False
+
+        return True
 
     def run(self, X, y):
         X_train, X_val, X_test, y_train, y_val, y_test = self._split(X, y)
 
         results = ResultsManager()
         configs = self._get_configs()
+        configs = [c for c in configs if self.is_valid_combination(c)]
 
         print(f"\nTotal de experimentos: {len(configs)}")
 
@@ -82,5 +97,6 @@ class ExperimentRunner:
             )
 
         df = results.summary()
+        results.save()
 
         return df
